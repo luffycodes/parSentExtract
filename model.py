@@ -201,6 +201,7 @@ class BiRNN(object):
                     target_final_state_bw = target_final_state_bw.h
                 source_final_state = tf.concat([source_final_state_fw, source_final_state_bw],
                                                axis=1)
+                print("Source final state", source_final_state)
                 target_final_state = tf.concat([target_final_state_fw, target_final_state_bw],
                                                axis=1)
 
