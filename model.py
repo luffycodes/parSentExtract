@@ -181,10 +181,10 @@ class BiRNN(object):
             self.config.state_size *= 2
             # Mean and max pooling only work for 1 layer BiRNN.
             if self.config.use_mean_pooling:
-                source_final_state = self.average_pooling(source_rnn_outputs, source_seq_length, name="source_final_state_ph")
+                source_final_state = self.average_pooling(source_rnn_outputs, source_seq_length)
                 target_final_state = self.average_pooling(target_rnn_outputs, target_seq_length)
             elif self.config.use_max_pooling:
-                source_final_state = self.max_pooling(source_rnn_outputs, name="source_final_state_ph")
+                source_final_state = self.max_pooling(source_rnn_outputs)
                 target_final_state = self.max_pooling(target_rnn_outputs)
             else:
                 source_final_state_fw, source_final_state_bw = source_final_state
@@ -232,7 +232,7 @@ class BiRNN(object):
             # Sigmoid output layer.
             with tf.name_scope("output"):
                 probs = tf.sigmoid(logits,
-                                   name="probs2")
+                                   name="probs")
                 predicted_class = tf.cast(tf.greater(probs, decision_threshold),
                                           tf.float32,
                                           name="predicted_class")

@@ -49,7 +49,7 @@ tf.flags.DEFINE_string("target_language", "",
 tf.flags.DEFINE_float("decision_threshold", 0.99,
                       "Decision threshold to predict a positive label.")
 
-tf.flags.DEFINE_integer("batch_size", 2,
+tf.flags.DEFINE_integer("batch_size", 500,
                         "Batch size to use during evaluation.")
 
 tf.flags.DEFINE_integer("max_seq_length", 100,

@@ -52,10 +52,10 @@ tf.flags.DEFINE_float("max_gradient_norm", 5.0,
 tf.flags.DEFINE_float("decision_threshold", 0.99,
                       "Decision threshold to predict a positive label.")
 
-tf.flags.DEFINE_integer("embedding_size", 300,
+tf.flags.DEFINE_integer("embedding_size", 200,
                         "Size of each word embedding.")
 
-tf.flags.DEFINE_integer("state_size", 300,
+tf.flags.DEFINE_integer("state_size", 200,
                         "Size of the recurrent state in the BiRNN encoder.")
 
 tf.flags.DEFINE_integer("hidden_size", 128,
