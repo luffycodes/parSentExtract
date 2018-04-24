@@ -165,7 +165,7 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size):
     vocab = {}
     with open(data_path, mode="r", encoding="utf-8") as f:
         for line in f:
-            tokens = line.strip().split()
+            tokens = line.strip().split(" ")
             for word in tokens:
                 if word in vocab:
                     vocab[word] += 1
