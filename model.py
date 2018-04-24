@@ -88,10 +88,6 @@ class BiRNN(object):
                                                          shape=[],
                                                          name="decision_threshold")
 
-        source_final_state_ph = tf.placeholder(tf.float32,
-                                               shape=[None, None],
-                                               name="source_final_state_ph")
-
         # Embedding layer.
         with tf.variable_scope("embeddings"):
             if self.config.source_embeddings_path is not None and self.config.target_embeddings_path is not None:
@@ -185,10 +181,10 @@ class BiRNN(object):
             self.config.state_size *= 2
             # Mean and max pooling only work for 1 layer BiRNN.
             if self.config.use_mean_pooling:
-                source_final_state = self.average_pooling(source_rnn_outputs, source_seq_length)
+                source_final_state = self.average_pooling(source_rnn_outputs, source_seq_length, name="source_final_state_ph")
                 target_final_state = self.average_pooling(target_rnn_outputs, target_seq_length)
             elif self.config.use_max_pooling:
-                source_final_state = self.max_pooling(source_rnn_outputs)
+                source_final_state = self.max_pooling(source_rnn_outputs, name="source_final_state_ph")
                 target_final_state = self.max_pooling(target_rnn_outputs)
             else:
                 source_final_state_fw, source_final_state_bw = source_final_state
@@ -204,11 +200,9 @@ class BiRNN(object):
                     target_final_state_fw = target_final_state_fw.h
                     target_final_state_bw = target_final_state_bw.h
                 source_final_state = tf.concat([source_final_state_fw, source_final_state_bw],
-                                               axis=1)
+                                               axis=1, name="source_final_state_ph")
                 target_final_state = tf.concat([target_final_state_fw, target_final_state_bw],
                                                axis=1)
-            print("Source final state", source_final_state)
-            source_final_state_ph = source_final_state
 
         # Feed-forward neural network.
         with tf.variable_scope("feed_forward"):
