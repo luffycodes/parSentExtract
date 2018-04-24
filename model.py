@@ -232,7 +232,7 @@ class BiRNN(object):
             # Sigmoid output layer.
             with tf.name_scope("output"):
                 probs = tf.sigmoid(logits,
-                                   name="probs")
+                                   name="probs2")
                 predicted_class = tf.cast(tf.greater(probs, decision_threshold),
                                           tf.float32,
                                           name="predicted_class")
