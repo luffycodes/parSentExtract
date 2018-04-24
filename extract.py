@@ -175,7 +175,7 @@ def main(_):
 
         probs = sess.graph.get_tensor_by_name("feed_forward/output/probs:0")
 
-        source_final_state_ph = sess.graph.get_tensor_by_name("birnn/source_final_state_ph:0")
+        source_final_state_ph = sess.graph.get_tensor_by_name("feed_forward/output/probs:0")
 
         with open(FLAGS.source_output_path, mode="w", encoding="utf-8") as source_output_file,\
              open(FLAGS.target_output_path, mode="w", encoding="utf-8") as target_output_file,\
