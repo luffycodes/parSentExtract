@@ -88,6 +88,10 @@ class BiRNN(object):
                                                          shape=[],
                                                          name="decision_threshold")
 
+        source_final_state_ph = tf.placeholder(tf.float32,
+                                               shape=[None, None],
+                                               name="source_final_state_ph")
+
         # Embedding layer.
         with tf.variable_scope("embeddings"):
             if self.config.source_embeddings_path is not None and self.config.target_embeddings_path is not None:
@@ -201,9 +205,10 @@ class BiRNN(object):
                     target_final_state_bw = target_final_state_bw.h
                 source_final_state = tf.concat([source_final_state_fw, source_final_state_bw],
                                                axis=1)
-                print("Source final state", source_final_state)
                 target_final_state = tf.concat([target_final_state_fw, target_final_state_bw],
                                                axis=1)
+            print("Source final state", source_final_state)
+            source_final_state_ph = source_final_state
 
         # Feed-forward neural network.
         with tf.variable_scope("feed_forward"):

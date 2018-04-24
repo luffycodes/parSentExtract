@@ -49,7 +49,7 @@ tf.flags.DEFINE_string("target_language", "",
 tf.flags.DEFINE_float("decision_threshold", 0.99,
                       "Decision threshold to predict a positive label.")
 
-tf.flags.DEFINE_integer("batch_size", 500,
+tf.flags.DEFINE_integer("batch_size", 2,
                         "Batch size to use during evaluation.")
 
 tf.flags.DEFINE_integer("max_seq_length", 100,
@@ -72,7 +72,7 @@ def read_articles(source_path, target_path):
     return source_sentences, target_sentences
 
 
-def inference(sess, data_iterator, probs_op, placeholders):
+def inference(sess, data_iterator, probs_op, placeholders, source_final_state_ph):
     """Get the predicted class {0, 1} of given sentence pairs."""
     x_source, source_seq_length,\
     x_target, target_seq_length,\
@@ -91,7 +91,8 @@ def inference(sess, data_iterator, probs_op, placeholders):
                      source_seq_length: source_len,
                      target_seq_length: target_len}
 
-        batch_probs = sess.run(probs_op, feed_dict=feed_dict)
+        batch_probs, source_final_state_ph_please = sess.run(probs_op, source_final_state_ph, feed_dict=feed_dict)
+        print("please", source_final_state_ph_please)
         probs.extend(batch_probs.tolist())
     probs = np.array(probs[:data_iterator.size])
     return probs
@@ -99,7 +100,7 @@ def inference(sess, data_iterator, probs_op, placeholders):
 
 def extract_pairs(sess, source_sentences, target_sentences,
                   source_sentences_ids, target_sentences_ids,
-                  probs_op, placeholders):
+                  probs_op, placeholders, source_final_state_ph):
     """Extract sentence pairs from a pair of articles in source and target languages.
        Returns a list of (source sentence, target sentence, probability score) tuples.
     """
@@ -112,7 +113,7 @@ def extract_pairs(sess, source_sentences, target_sentences,
 
     data_iterator = utils.TestingIterator(np.array(data, dtype=object))
 
-    y_score = inference(sess, data_iterator, probs_op, placeholders)
+    y_score = inference(sess, data_iterator, probs_op, placeholders, source_final_state_ph)
     y_score = [(score, k) for k, score in enumerate(y_score)]
     y_score.sort(reverse=True)
 
@@ -170,6 +171,8 @@ def main(_):
 
         labels = sess.graph.get_tensor_by_name("labels:0")
 
+        source_final_state_ph = sess.graph.get_tensor_by_name("source_final_state_ph:0")
+
         placeholders = [x_source, source_seq_length, x_target, target_seq_length, labels]
 
         probs = sess.graph.get_tensor_by_name("feed_forward/output/probs:0")
@@ -191,7 +194,7 @@ def main(_):
                 # Extract sentence pairs.
                 pairs = extract_pairs(sess, source_sentences, target_sentences,
                                       source_sentences_ids, target_sentences_ids,
-                                      probs, placeholders)
+                                      probs, placeholders, source_final_state_ph)
                 if not pairs:
                     continue
                 for source_sentence, target_sentence, score in pairs:
