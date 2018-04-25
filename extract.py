@@ -92,7 +92,14 @@ def inference(sess, data_iterator, probs_op, placeholders, source_final_state_ph
                      target_seq_length: target_len}
 
         batch_probs, source_final_state_ph_please = sess.run([probs_op, source_final_state_ph], feed_dict=feed_dict)
-        print("please", source_final_state_ph_please)
+        a = source_final_state_ph_please[0]
+        b = source_final_state_ph_please[1]
+        normalize_a = tf.nn.l2_normalize(a, 0)
+        normalize_b = tf.nn.l2_normalize(b, 0)
+        cos_similarity = tf.reduce_sum(tf.multiply(normalize_a, normalize_b))
+        sess2 = tf.Session()
+        cos_sim = sess2.run(cos_similarity, feed_dict={a: [1, 2, 3], b: [2, 4, 6]})
+        print("please", cos_sim)
         probs.extend(batch_probs.tolist())
     probs = np.array(probs[:data_iterator.size])
     return probs
