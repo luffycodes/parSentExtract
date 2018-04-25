@@ -72,7 +72,7 @@ def read_articles(source_path, target_path):
     return source_sentences, target_sentences
 
 
-def inference(sess, data_iterator, probs_op, placeholders, source_final_state_ph):
+def inference(sess, data_iterator, probs_op, placeholders):
     """Get the predicted class {0, 1} of given sentence pairs."""
     x_source, source_seq_length,\
     x_target, target_seq_length,\
@@ -91,8 +91,7 @@ def inference(sess, data_iterator, probs_op, placeholders, source_final_state_ph
                      source_seq_length: source_len,
                      target_seq_length: target_len}
 
-        batch_probs, source_final_state_ph_please = sess.run(probs_op, source_final_state_ph, feed_dict=feed_dict)
-        print("please", source_final_state_ph_please)
+        batch_probs = sess.run(probs_op, feed_dict=feed_dict)
         probs.extend(batch_probs.tolist())
     probs = np.array(probs[:data_iterator.size])
     return probs
@@ -100,7 +99,7 @@ def inference(sess, data_iterator, probs_op, placeholders, source_final_state_ph
 
 def extract_pairs(sess, source_sentences, target_sentences,
                   source_sentences_ids, target_sentences_ids,
-                  probs_op, placeholders, source_final_state_ph):
+                  probs_op, placeholders):
     """Extract sentence pairs from a pair of articles in source and target languages.
        Returns a list of (source sentence, target sentence, probability score) tuples.
     """
@@ -113,7 +112,7 @@ def extract_pairs(sess, source_sentences, target_sentences,
 
     data_iterator = utils.TestingIterator(np.array(data, dtype=object))
 
-    y_score = inference(sess, data_iterator, probs_op, placeholders, source_final_state_ph)
+    y_score = inference(sess, data_iterator, probs_op, placeholders)
     y_score = [(score, k) for k, score in enumerate(y_score)]
     y_score.sort(reverse=True)
 
@@ -175,8 +174,6 @@ def main(_):
 
         probs = sess.graph.get_tensor_by_name("feed_forward/output/probs:0")
 
-        source_final_state_ph = sess.graph.get_tensor_by_name("birnn/source_final_state_ph:0")
-
         with open(FLAGS.source_output_path, mode="w", encoding="utf-8") as source_output_file,\
              open(FLAGS.target_output_path, mode="w", encoding="utf-8") as target_output_file,\
              open(FLAGS.score_output_path, mode="w", encoding="utf-8") as score_output_file:
@@ -194,7 +191,7 @@ def main(_):
                 # Extract sentence pairs.
                 pairs = extract_pairs(sess, source_sentences, target_sentences,
                                       source_sentences_ids, target_sentences_ids,
-                                      probs, placeholders, source_final_state_ph)
+                                      probs, placeholders)
                 if not pairs:
                     continue
                 for source_sentence, target_sentence, score in pairs:
