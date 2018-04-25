@@ -79,7 +79,7 @@ def inference(sess, source_path, target_path, source_vocab, target_vocab, probs_
     # Read sentences from articles.
     freeResponseCosineWithCorrectAns = pd.read_csv("Mt_extract.csv")
 
-    for row in freeResponseCosineWithCorrectAns.rows:
+    for index, row in freeResponseCosineWithCorrectAns.iterrows():
         source_sentences = [freeResponseCosineWithCorrectAns['freeResponse'], freeResponseCosineWithCorrectAns['correctAnswer']]
         target_sentences = ['Was soll sie tun, die tschechischen Sozialdemokraten in Prag kennen weder Voldemort',
                             'Was soll sie tun, die tschechischen Sozialdemokraten in Prag kennen weder Voldemort']
