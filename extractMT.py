@@ -86,7 +86,7 @@ def inference(sess, source_path, target_path, source_vocab, target_vocab, probs_
         print(row['score'])
 
         # Convert sentences to token ids sequences.
-        source_sentences_ids = [utils.sentence_to_token_ids_pandas(sent, source_vocab, FLAGS.max_seq_length)
+        source_sentences_ids = [utils.sentence_to_token_ids(sent, source_vocab, FLAGS.max_seq_length)
                                 for sent in source_sentences]
         target_sentences_ids = [utils.sentence_to_token_ids(sent, target_vocab, FLAGS.max_seq_length)
                                 for sent in target_sentences]
