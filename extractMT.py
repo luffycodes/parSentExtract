@@ -78,6 +78,7 @@ def inference(sess, source_path, target_path, source_vocab, target_vocab, probs_
 
     # Read sentences from articles.
     freeResponseCosineWithCorrectAns = pd.read_csv("Mt_extract.csv")
+    question_ans_cosine_df = pd.DataFrame(columns=['freeResponse', 'correctAnswer', 'score', 'similarity'])
 
     for index, row in freeResponseCosineWithCorrectAns.iterrows():
         source_sentences = [row['freeResponse'], row['correctAnswer']]
@@ -128,8 +129,15 @@ def inference(sess, source_path, target_path, source_vocab, target_vocab, probs_
             sess2 = tf.Session()
             cos_sim = sess2.run(cos_similarity, feed_dict={a: source_final_state_ph_please[0], b: source_final_state_ph_please[1]})
             print("please", cos_sim)
+            print("index", index)
             probs.extend(batch_probs.tolist())
+
+        question_ans_cosine_df.loc[index] = [row['freeResponse'], row['correctAnswer'], row['score'], cos_sim]
+
         probs = np.array(probs[:data_iterator.size])
+
+    question_ans_cosine_df.to_csv("mt_please.csv", index=False)
+
     return probs
 
 
