@@ -91,7 +91,7 @@ def inference(sess, data_iterator, probs_op, placeholders, source_final_state_ph
                      source_seq_length: source_len,
                      target_seq_length: target_len}
 
-        batch_probs, source_final_state_ph_please = sess.run(probs_op, source_final_state_ph, feed_dict=feed_dict)
+        batch_probs, source_final_state_ph_please = sess.run([probs_op, source_final_state_ph], feed_dict=feed_dict)
         print("please", source_final_state_ph_please)
         probs.extend(batch_probs.tolist())
     probs = np.array(probs[:data_iterator.size])
