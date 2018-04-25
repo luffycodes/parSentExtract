@@ -198,6 +198,14 @@ def sentence_to_token_ids(sentence, vocabulary, max_sequence_length):
     return [vocabulary.get(w, UNK_ID) for w in words]
 
 
+def sentence_to_token_ids_pandas(sentence, vocabulary, max_sequence_length):
+    """Convert a string to a list of integers representing token-ids."""
+    words = sentence.str.strip().split()
+    if len(words) > max_sequence_length:
+        words = words[:max_sequence_length]
+    return [vocabulary.get(w, UNK_ID) for w in words]
+
+
 def read_data(source_path, target_path, source_vocab, target_vocab, max_seq_length=200):
     """Read parallel data and convert to token ids."""
     data = []
