@@ -13,6 +13,7 @@ import numpy as np
 import tensorflow as tf
 
 import utils
+import pandas as pd
 
 
 tf.flags.DEFINE_string("checkpoint_dir", "",
@@ -76,56 +77,59 @@ def inference(sess, source_path, target_path, source_vocab, target_vocab, probs_
     """Get the predicted class {0, 1} of given sentence pairs."""
 
     # Read sentences from articles.
-    with open(source_path, mode="r", encoding="utf-8") as source_file, \
-            open(target_path, mode="r", encoding="utf-8") as target_file:
-        source_sentences = [l for l in source_file]
-        target_sentences = [l for l in target_file]
+    freeResponseCosineWithCorrectAns = pd.read_csv("Mt_extract.csv")
 
-    # Convert sentences to token ids sequences.
-    source_sentences_ids = [utils.sentence_to_token_ids(sent, source_vocab, FLAGS.max_seq_length)
-                            for sent in source_sentences]
-    target_sentences_ids = [utils.sentence_to_token_ids(sent, target_vocab, FLAGS.max_seq_length)
-                            for sent in target_sentences]
+    for row in freeResponseCosineWithCorrectAns.rows:
+        source_sentences = [freeResponseCosineWithCorrectAns['freeResponse'], freeResponseCosineWithCorrectAns['correctAnswer']]
+        target_sentences = ['Was soll sie tun, die tschechischen Sozialdemokraten in Prag kennen weder Voldemort',
+                            'Was soll sie tun, die tschechischen Sozialdemokraten in Prag kennen weder Voldemort']
+        print(freeResponseCosineWithCorrectAns['score'])
 
-    # Do stuff
-    pairs = [(i, j) for i, j in zip(range(len(source_sentences)),
-                                    range(len(target_sentences)))]
+        # Convert sentences to token ids sequences.
+        source_sentences_ids = [utils.sentence_to_token_ids(sent, source_vocab, FLAGS.max_seq_length)
+                                for sent in source_sentences]
+        target_sentences_ids = [utils.sentence_to_token_ids(sent, target_vocab, FLAGS.max_seq_length)
+                                for sent in target_sentences]
 
-    data = [(source_sentences_ids[i], target_sentences_ids[j], 1.0)
-            for i, j in zip(range(len(source_sentences)),
-                            range(len(target_sentences)))]
+        # Do stuff
+        pairs = [(i, j) for i, j in zip(range(len(source_sentences)),
+                                        range(len(target_sentences)))]
 
-    data_iterator = utils.TestingIterator(np.array(data, dtype=object))
+        data = [(source_sentences_ids[i], target_sentences_ids[j], 1.0)
+                for i, j in zip(range(len(source_sentences)),
+                                range(len(target_sentences)))]
 
-    # Do more stuff
-    x_source, source_seq_length,\
-    x_target, target_seq_length,\
-    labels = placeholders
+        data_iterator = utils.TestingIterator(np.array(data, dtype=object))
 
-    num_iter = int(np.ceil(data_iterator.size / FLAGS.batch_size))
-    probs = []
-    for step in xrange(num_iter):
-        source, target, label = data_iterator.next_batch(FLAGS.batch_size)
-        source_len = utils.sequence_length(source)
-        target_len = utils.sequence_length(target)
+        # Do more stuff
+        x_source, source_seq_length,\
+        x_target, target_seq_length,\
+        labels = placeholders
 
-        feed_dict = {x_source: source,
-                     x_target: target,
-                     labels: label,
-                     source_seq_length: source_len,
-                     target_seq_length: target_len}
+        num_iter = int(np.ceil(data_iterator.size / FLAGS.batch_size))
+        probs = []
+        for step in xrange(num_iter):
+            source, target, label = data_iterator.next_batch(FLAGS.batch_size)
+            source_len = utils.sequence_length(source)
+            target_len = utils.sequence_length(target)
 
-        batch_probs, source_final_state_ph_please = sess.run([probs_op, source_final_state_ph], feed_dict=feed_dict)
-        a = tf.placeholder(tf.float32, shape=[None], name="input_placeholder_a")
-        b = tf.placeholder(tf.float32, shape=[None], name="input_placeholder_b")
-        normalize_a = tf.nn.l2_normalize(a, 0)
-        normalize_b = tf.nn.l2_normalize(b, 0)
-        cos_similarity = tf.reduce_sum(tf.multiply(normalize_a, normalize_b))
-        sess2 = tf.Session()
-        cos_sim = sess2.run(cos_similarity, feed_dict={a: source_final_state_ph_please[0], b: source_final_state_ph_please[1]})
-        print("please", cos_sim)
-        probs.extend(batch_probs.tolist())
-    probs = np.array(probs[:data_iterator.size])
+            feed_dict = {x_source: source,
+                         x_target: target,
+                         labels: label,
+                         source_seq_length: source_len,
+                         target_seq_length: target_len}
+
+            batch_probs, source_final_state_ph_please = sess.run([probs_op, source_final_state_ph], feed_dict=feed_dict)
+            a = tf.placeholder(tf.float32, shape=[None], name="input_placeholder_a")
+            b = tf.placeholder(tf.float32, shape=[None], name="input_placeholder_b")
+            normalize_a = tf.nn.l2_normalize(a, 0)
+            normalize_b = tf.nn.l2_normalize(b, 0)
+            cos_similarity = tf.reduce_sum(tf.multiply(normalize_a, normalize_b))
+            sess2 = tf.Session()
+            cos_sim = sess2.run(cos_similarity, feed_dict={a: source_final_state_ph_please[0], b: source_final_state_ph_please[1]})
+            print("please", cos_sim)
+            probs.extend(batch_probs.tolist())
+        probs = np.array(probs[:data_iterator.size])
     return probs
 
 
