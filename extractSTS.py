@@ -79,6 +79,7 @@ def inference(sess, source_path, target_path, source_vocab, target_vocab, probs_
 
     # Read sentences from articles.
     freeResponseCosineWithCorrectAns = pd.read_csv("sts-test.csv", sep='\t', encoding='utf-8')
+    freeResponseCosineWithCorrectAns = freeResponseCosineWithCorrectAns.dropna(axis=0, how='any')
     question_ans_cosine_df = pd.DataFrame(columns=['sent1', 'sent2', 'score', 'similarity'])
 
     numbers_x = []
