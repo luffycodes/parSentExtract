@@ -79,12 +79,12 @@ def inference(sess, source_path, target_path, source_vocab, target_vocab, probs_
 
     # Read sentences from articles.
     freeResponseCosineWithCorrectAns = pd.read_csv("sts-test.csv", sep='\t', encoding='utf-8')
-    question_ans_cosine_df = pd.DataFrame(columns=['freeResponse', 'correctAnswer', 'score', 'similarity'])
+    question_ans_cosine_df = pd.DataFrame(columns=['sent1', 'sent2', 'score', 'similarity'])
 
     numbers_x = []
     numbers_y = []
     for index, row in freeResponseCosineWithCorrectAns.iterrows():
-        source_sentences = [row['freeResponse'], row['correctAnswer']]
+        source_sentences = [row['sent1'], row['sent2']]
         target_sentences = ['Was soll sie tun, die tschechischen Sozialdemokraten in Prag kennen weder Voldemort',
                             'Was soll sie tun, die tschechischen Sozialdemokraten in Prag kennen weder Voldemort']
         print(row['score'])
