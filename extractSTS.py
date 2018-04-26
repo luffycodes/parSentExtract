@@ -139,6 +139,7 @@ def inference(sess, source_path, target_path, source_vocab, target_vocab, probs_
         question_ans_cosine_df.loc[index] = [row['sent1'], row['sent2'], row['score'], cos_sim]
         numbers_x.append(row['score']/5)
         numbers_y.append(cos_sim)
+        sess2.close()
 
         probs = np.array(probs[:data_iterator.size])
 
