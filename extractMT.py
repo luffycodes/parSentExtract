@@ -77,7 +77,7 @@ def inference(sess, source_path, target_path, source_vocab, target_vocab, probs_
     """Get the predicted class {0, 1} of given sentence pairs."""
 
     # Read sentences from articles.
-    freeResponseCosineWithCorrectAns = pd.read_csv("Mt_extract.csv")
+    freeResponseCosineWithCorrectAns = pd.read_csv("Mt_extract_clean.csv")
     question_ans_cosine_df = pd.DataFrame(columns=['freeResponse', 'correctAnswer', 'score', 'similarity'])
 
     for index, row in freeResponseCosineWithCorrectAns.iterrows():
@@ -133,10 +133,13 @@ def inference(sess, source_path, target_path, source_vocab, target_vocab, probs_
             probs.extend(batch_probs.tolist())
 
         question_ans_cosine_df.loc[index] = [row['freeResponse'], row['correctAnswer'], row['score'], cos_sim]
-
+        sess2.close()
         probs = np.array(probs[:data_iterator.size])
 
-    question_ans_cosine_df.to_csv("mt_please.csv", index=False)
+        if index % 500 == 0 and index != 0:
+            question_ans_cosine_df.to_csv("mt_please_more_trained.csv", index=False)
+
+    question_ans_cosine_df.to_csv("mt_please_more_trained.csv", index=False)
 
     return probs
 
